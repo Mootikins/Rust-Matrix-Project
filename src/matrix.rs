@@ -69,9 +69,10 @@ impl Matrix {
     /// ```
     ///
     /// Author: Matthew Krohn
-    fn row_iter<'a>(&'a self, row_num: usize) -> impl Iterator<Item = &i32> + 'a {
+    fn row_iter(&self, row_num: usize) -> impl Iterator<Item = &i32> + '_ {
         assert!(row_num < self.rows, "Row index out of bounds");
-        self.data.iter().skip(self.cols * row_num).take(self.cols)
+        let offset = self.cols * row_num;
+        self.data[offset..offset + self.cols].iter()
     }
 
     /// Returns an iterator of references to the items of the given column
@@ -87,7 +88,7 @@ impl Matrix {
     /// ```
     ///
     /// Author: Matthew Krohn
-    fn col_iter<'a>(&'a self, col_num: usize) -> impl Iterator<Item = &i32> + 'a {
+    fn col_iter(&self, col_num: usize) -> impl Iterator<Item = &i32> + '_ {
         assert!(col_num < self.cols, "Column index out of bounds");
         self.data.iter().skip(col_num).step_by(self.cols)
     }
