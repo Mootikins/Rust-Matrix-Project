@@ -69,7 +69,7 @@ impl Matrix {
     /// ```
     ///
     /// Author: Matthew Krohn
-    fn row_iter(&self, row_num: usize) -> impl Iterator<Item = &i32> + '_ {
+    pub fn row_iter(&self, row_num: usize) -> impl Iterator<Item = &i32> + '_ {
         assert!(row_num < self.rows, "Row index out of bounds");
         let offset = self.cols * row_num;
         self.data[offset..offset + self.cols].iter()
@@ -88,7 +88,7 @@ impl Matrix {
     /// ```
     ///
     /// Author: Matthew Krohn
-    fn col_iter(&self, col_num: usize) -> impl Iterator<Item = &i32> + '_ {
+    pub fn col_iter(&self, col_num: usize) -> impl Iterator<Item = &i32> + '_ {
         assert!(col_num < self.cols, "Column index out of bounds");
         self.data.iter().skip(col_num).step_by(self.cols)
     }
@@ -110,7 +110,7 @@ impl Matrix {
     /// assert_eq!(new_mat, result_mat);
     /// ```
     /// Author: Matthew Krohn
-    fn mul_mat(&self, rhs: &Matrix) -> Matrix {
+    pub fn mul_mat(&self, rhs: &Matrix) -> Matrix {
         assert_eq!(self.cols, rhs.rows);
         let mut matr_data = vec![0; self.rows * rhs.cols];
 
