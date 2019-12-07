@@ -27,7 +27,7 @@ impl Display for Operator {
             Operator::Add => "Added to\n",
             Operator::Subtract => "Minus\n",
         };
-        write!(f, "{}", output)
+        f.write_str(output)
     }
 }
 
