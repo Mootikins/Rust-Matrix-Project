@@ -110,21 +110,22 @@ impl Matrix {
     /// assert_eq!(new_mat, result_mat);
     /// ```
     /// Author: Matthew Krohn
-    pub fn mul_mat(&self, rhs: &Matrix) -> Matrix {
+    fn mul_mat(&self, rhs: &Matrix) -> Matrix {
         assert_eq!(self.cols, rhs.rows);
         let mut matr_data = vec![0; self.rows * rhs.cols];
 
-        let mut parts: Vec<&mut [i32]> = matr_data.chunks_mut(rhs.cols).collect();
+        let parts = matr_data.chunks_exact_mut(rhs.cols).enumerate();
 
         // Concurrent matrix multiply
         crossbeam::scope(|spawner| {
-            for (row_num, part) in &mut parts.iter_mut().enumerate() {
+            for (row_num, part) in parts {
                 spawner.spawn(move |_| {
-                    for (col_num, cell) in &mut part.iter_mut().enumerate() {
+                    for (col_num, cell) in part.iter_mut().enumerate() {
                         *cell = self
                             .row_iter(row_num)
                             .zip(rhs.col_iter(col_num))
-                            .fold(0, |sum, (lhs_num, rhs_num)| sum + lhs_num * rhs_num);
+                            .map(|(lhs, rhs)| lhs + rhs)
+                            .sum();
                     }
                 });
             }
