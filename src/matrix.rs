@@ -219,22 +219,22 @@ impl Index<[usize; 2]> for Matrix {
     ///
     /// # Arguments
     /// self - reference to this Matrix
-    /// index - spot to get
+    /// index - index of spot to get (first index is row, second index is column)
     ///
     /// # Return
     /// Returns the value at index
     ///
     /// Author: Matthew Krohn
-    fn index(&self, index: [usize; 2]) -> &i32 {
+    fn index(&self, [row_idx, col_idx]: [usize; 2]) -> &i32 {
         assert!(
-            index[0] < self.rows,
+            row_idx < self.rows,
             "Row index is greater than row dimension."
         );
         assert!(
-            index[1] < self.cols,
+            col_idx < self.cols,
             "Column index is greater than column dimension."
         );
-        &self.data[index[0] * self.cols + index[1]]
+        &self.data[row_idx * self.cols + col_idx]
     }
 }
 
@@ -243,22 +243,22 @@ impl IndexMut<[usize; 2]> for Matrix {
     ///
     /// # Arguments
     /// self - reference to this Matrix
-    /// index - index of spot to get
+    /// index - index of spot to get (first index is row, second index is column)
     ///
     /// # Return
     /// Returns a mutable reference to the value at index
     ///
     /// Author: Matthew Krohn
-    fn index_mut(&mut self, index: [usize; 2]) -> &mut i32 {
+    fn index_mut(&mut self, [row_idx, col_idx]: [usize; 2]) -> &i32 {
         assert!(
-            index[0] < self.rows,
+            row_idx < self.rows,
             "Row index is greater than row dimension."
         );
         assert!(
-            index[1] < self.cols,
+            col_idx < self.cols,
             "Column index is greater than column dimension."
         );
-        &mut self.data[index[0] * self.cols + index[1]]
+        &mut self.data[row_idx * self.cols + col_idx]
     }
 }
 
