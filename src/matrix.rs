@@ -294,12 +294,9 @@ impl Mul<i32> for Matrix {
     /// * `rhs` - The scalar to multiply by
     ///
     /// Author: Jennifer Kulich
-    fn mul(self, rhs: i32) -> Self {
-        Matrix {
-            rows: self.rows,
-            cols: self.cols,
-            data: self.data.iter().map(|num| *num * rhs).collect(),
-        }
+    fn mul(mut self, rhs: i32) -> Self {
+        self.data.iter_mut().for_each(|num| *num *= rhs);
+        self
     }
 }
 
