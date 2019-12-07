@@ -273,11 +273,11 @@ impl Display for Matrix {
     ///
     /// Author: Matthew Krohn
     fn fmt(&self, f: &mut Formatter) -> Result {
-        for row in 0..self.rows {
-            for col in 0..self.cols {
-                write!(f, "{: >6} ", self[[row, col]])?;
+        for row in self.data.chunks_exact[self.cols] {
+            for &i in row {
+                write!(f, "{: >6} ", i)?;
             }
-            writeln!(f)?;
+            f.write_str("\n")?;
         }
         Ok(())
     }
