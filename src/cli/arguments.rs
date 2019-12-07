@@ -2,6 +2,7 @@ use std::path::PathBuf;
 
 /// Author: Tyler Holinka
 /// Description: The "internal" representation of the command line arguments
+#[derive(PartialEq, Eq)]
 pub struct Arguments {
     pub debug: bool,
     pub input: PathBuf,
@@ -24,24 +25,6 @@ impl std::fmt::Debug for Arguments {
         } else {
             f.write_str("Out: None")
         }
-    }
-}
-
-impl std::cmp::PartialEq for Arguments {
-    /// Author: Tyler Holinka
-    /// Description: Implements PartialEq so Arguments, which allows comparing Arguments
-    /// Parameter self: reference to this instance of Arguments
-    /// Parameter other: reference to another instance of Arguments
-    /// Return: true if the two references are equal, false otherwise
-    fn eq(&self, other: &Self) -> bool {
-        if self.debug != other.debug {
-            return false;
-        } else if self.input != other.input {
-            return false;
-        } else if self.out != other.out {
-            return false;
-        }
-        return true;
     }
 }
 
