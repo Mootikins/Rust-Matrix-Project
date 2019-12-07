@@ -18,11 +18,11 @@ impl std::fmt::Debug for Arguments {
         writeln!(f, "Debug: {}", self.debug)?;
         writeln!(f, "Input: {:?}", self.input)?;
 
-        if self.out == None {
-            writeln!(f, "Out: {:?}", self.out)
-        } else {
+        if let Some(out) = self.out_as_ref() {
             // don't output "Some(PathBuf)", instead output "PathBuf"
-            writeln!(f, "Out: {:?}", self.out.as_ref().unwrap())
+            writeln!(f, "Out: {:?}", out)
+        } else {
+            f.write_str("Out: None")
         }
     }
 }
