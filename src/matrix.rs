@@ -271,14 +271,13 @@ impl Display for Matrix {
     ///
     /// Author: Matthew Krohn
     fn fmt(&self, f: &mut Formatter) -> Result {
-        let mut output = String::new();
         for row in 0..self.rows {
             for col in 0..self.cols {
-                output = format!("{}{: >6} ", output, self[[row, col]]);
+                write!(f, "{: >6} ", self[[row, col]])?;
             }
-            output = format!("{}\n", output);
+            writeln!(f)?;
         }
-        write!(f, "{}", output.to_string())
+        Ok(())
     }
 }
 
