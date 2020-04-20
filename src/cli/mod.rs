@@ -36,7 +36,7 @@ fn process(opt: Opt) -> Arguments {
     // convert the outfile to an Option
     let out: Option<PathBuf> = match opt.out_file.as_ref() {
         "" => None,
-        _ => Some(PathBuf::from_str(&opt.out_file).unwrap()),
+        _ => PathBuf::from_str(&opt.out_file).ok(), 
     };
 
     Arguments {
@@ -97,7 +97,7 @@ mod tests {
         let expected = Arguments {
             debug: false,
             input: PathBuf::from_str(input).unwrap(),
-            out: Some(PathBuf::from_str(out).unwrap()),
+            out: PathBuf::from_str(out).ok(),
         };
 
         let opt = Opt::from_iter(&["test", "-i", input, "-o", out]);
