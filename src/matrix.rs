@@ -69,9 +69,10 @@ impl Matrix {
     /// ```
     ///
     /// Author: Matthew Krohn
-    fn row_iter<'a>(&'a self, row_num: usize) -> impl Iterator<Item = &i32> + 'a {
+    pub fn row_iter(&self, row_num: usize) -> impl Iterator<Item = &i32> + '_ {
         assert!(row_num < self.rows, "Row index out of bounds");
-        self.data.iter().skip(self.cols * row_num).take(self.cols)
+        let offset = self.cols * row_num;
+        self.data[offset..offset + self.cols].iter()
     }
 
     /// Returns an iterator of references to the items of the given column
@@ -87,7 +88,7 @@ impl Matrix {
     /// ```
     ///
     /// Author: Matthew Krohn
-    fn col_iter<'a>(&'a self, col_num: usize) -> impl Iterator<Item = &i32> + 'a {
+    pub fn col_iter(&self, col_num: usize) -> impl Iterator<Item = &i32> + '_ {
         assert!(col_num < self.cols, "Column index out of bounds");
         self.data.iter().skip(col_num).step_by(self.cols)
     }
@@ -113,17 +114,18 @@ impl Matrix {
         assert_eq!(self.cols, rhs.rows);
         let mut matr_data = vec![0; self.rows * rhs.cols];
 
-        let mut parts: Vec<&mut [i32]> = matr_data.chunks_mut(rhs.cols).collect();
+        let parts = matr_data.chunks_exact_mut(rhs.cols).enumerate();
 
         // Concurrent matrix multiply
         crossbeam::scope(|spawner| {
-            for (row_num, part) in &mut parts.iter_mut().enumerate() {
+            for (row_num, part) in parts {
                 spawner.spawn(move |_| {
-                    for (col_num, cell) in &mut part.iter_mut().enumerate() {
+                    for (col_num, cell) in part.iter_mut().enumerate() {
                         *cell = self
                             .row_iter(row_num)
                             .zip(rhs.col_iter(col_num))
-                            .fold(0, |sum, (lhs_num, rhs_num)| sum + lhs_num * rhs_num);
+                            .map(|(lhs, rhs)| lhs + rhs)
+                            .sum();
                     }
                 });
             }
@@ -217,22 +219,22 @@ impl Index<[usize; 2]> for Matrix {
     ///
     /// # Arguments
     /// self - reference to this Matrix
-    /// index - spot to get
+    /// index - index of spot to get (first index is row, second index is column)
     ///
     /// # Return
     /// Returns the value at index
     ///
     /// Author: Matthew Krohn
-    fn index(&self, index: [usize; 2]) -> &i32 {
+    fn index(&self, [row_idx, col_idx]: [usize; 2]) -> &i32 {
         assert!(
-            index[0] < self.rows,
+            row_idx < self.rows,
             "Row index is greater than row dimension."
         );
         assert!(
-            index[1] < self.cols,
+            col_idx < self.cols,
             "Column index is greater than column dimension."
         );
-        &self.data[index[0] * self.cols + index[1]]
+        &self.data[row_idx * self.cols + col_idx]
     }
 }
 
@@ -241,22 +243,22 @@ impl IndexMut<[usize; 2]> for Matrix {
     ///
     /// # Arguments
     /// self - reference to this Matrix
-    /// index - index of spot to get
+    /// index - index of spot to get (first index is row, second index is column)
     ///
     /// # Return
     /// Returns a mutable reference to the value at index
     ///
     /// Author: Matthew Krohn
-    fn index_mut(&mut self, index: [usize; 2]) -> &mut i32 {
+    fn index_mut(&mut self, [row_idx, col_idx]: [usize; 2]) -> &i32 {
         assert!(
-            index[0] < self.rows,
+            row_idx < self.rows,
             "Row index is greater than row dimension."
         );
         assert!(
-            index[1] < self.cols,
+            col_idx < self.cols,
             "Column index is greater than column dimension."
         );
-        &mut self.data[index[0] * self.cols + index[1]]
+        &mut self.data[row_idx * self.cols + col_idx]
     }
 }
 
@@ -271,11 +273,11 @@ impl Display for Matrix {
     ///
     /// Author: Matthew Krohn
     fn fmt(&self, f: &mut Formatter) -> Result {
-        for row in 0..self.rows {
-            for col in 0..self.cols {
-                write!(f, "{: >6} ", self[[row, col]])?;
+        for row in self.data.chunks_exact[self.cols] {
+            for &i in row {
+                write!(f, "{: >6} ", i)?;
             }
-            writeln!(f)?;
+            f.write_str("\n")?;
         }
         Ok(())
     }
@@ -292,12 +294,9 @@ impl Mul<i32> for Matrix {
     /// * `rhs` - The scalar to multiply by
     ///
     /// Author: Jennifer Kulich
-    fn mul(self, rhs: i32) -> Self {
-        Matrix {
-            rows: self.rows,
-            cols: self.cols,
-            data: self.data.iter().map(|num| *num * rhs).collect(),
-        }
+    fn mul(mut self, rhs: i32) -> Self {
+        self.data.iter_mut().for_each(|num| *num *= rhs);
+        self
     }
 }
 
